@@ -52,7 +52,7 @@ def sending_data_to_queue(data, queue_name):
 def callback(ch, method, properties, body):
     print(f'Получен вектор признаков {body}')
     X = json.loads(body)
-    y_pred = regressor.predict(X)
+    y_pred = regressor.predict(X.reshape(-1, 1))
     print("Получили предсказание модели.")
     sending_data_to_queue(y_pred, 'y_pred')
 

@@ -31,6 +31,8 @@ print('Сообщение с правильным ответом, отправл
 # Создадим очередь, с которой будем работать:
 channel.queue_declare(queue='Features')
 
+print('Shape X before used random_row:', X[random_row].shape)
+
 # сериализуем X[random_row].
 X_data = json.dumps(list(X[random_row]))
 

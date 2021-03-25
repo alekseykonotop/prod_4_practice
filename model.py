@@ -5,6 +5,7 @@ import pika
 import pickle
 import numpy as np
 import requests
+import json
 
 from sklearn import linear_model
 

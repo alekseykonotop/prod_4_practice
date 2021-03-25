@@ -51,8 +51,8 @@ def sending_data_to_queue(data, queue_name):
 # Напишем функцию, определяющую, как работать с полученным сообщением:
 def callback(ch, method, properties, body):
     print(f'Получен вектор признаков {body}')
-    X = json.loads(body)
-    y_pred = regressor.predict(X.reshape(-1, 1))
+    X = np.array(json.loads(body)).reshape(-1, 1)
+    y_pred = regressor.predict(X)
     print("Получили предсказание модели.")
     sending_data_to_queue(y_pred, 'y_pred')
 

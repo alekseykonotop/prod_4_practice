@@ -39,7 +39,7 @@ def sending_data_to_queue(data, queue_name):
     # Укажем, с какой очередью будем работать:
     channel.queue_declare(queue=queue_name)
     # сериализуем y[random_row]
-    data = json.dumps(data)
+    data = json.dumps(list(data))
 
     # Опубликуем сообщение
     channel.basic_publish(exchange='',

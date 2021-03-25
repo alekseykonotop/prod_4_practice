@@ -4,8 +4,7 @@
 import pika
 import json
 
-connection = pika.BlockingConnection(
-    pika.ConnectionParameters(host='localhost'))
+connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
 channel = connection.channel()
 
 channel.queue_declare(queue='y_true')
@@ -18,7 +17,7 @@ channel.basic_consume(
     queue='y_pred', on_message_callback=callback, auto_ack=True)
 
 channel.basic_consume(
-      queue='y_true', on_message_callback=callback, auto_ack=True)
+    queue='y_true', on_message_callback=callback, auto_ack=True)
 
 print('...Ожидание сообщений, для выхода нажмите CTRL+C')
-      channel.start_consuming()
+channel.start_consuming()

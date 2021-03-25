@@ -8,6 +8,7 @@ import json
 
 
 X, y = load_diabetes(return_X_y=True)
+print("Shape X: ", X.shape)
 random_row = np.random.randint(0, X.shape[0]-1)
 
 # Подключение к серверу на локальном хосте:

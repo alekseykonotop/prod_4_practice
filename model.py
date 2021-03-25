@@ -9,12 +9,12 @@ import requests
 from sklearn import linear_model
 
 # Скачаем сначала нашу обученную модель
-PKL_URL = 'https://lms.skillfactory.ru/assets/courseware/v1/d4d921964d6f845735270713f07ab4fe/asset-v1:Skillfactory+DST-12+11MAR2020+type@asset+block/myfile.pkl'
-res = requests.get(PKL_URL, stream=True)
-res.raise_for_status()
-with open('myfile.pkl', 'wb') as pkl_file:
-    for chunk in res.iter_content(1024):
-        pkl_file.write(chunk)
+# PKL_URL = 'https://lms.skillfactory.ru/assets/courseware/v1/d4d921964d6f845735270713f07ab4fe/asset-v1:Skillfactory+DST-12+11MAR2020+type@asset+block/myfile.pkl'
+# res = requests.get(PKL_URL, stream=True)
+# res.raise_for_status()
+# with open('myfile.pkl', 'wb') as pkl_file:
+#     for chunk in res.iter_content(1024):
+#         pkl_file.write(chunk)
 
 
 # Прочтем скачанный файл с обученной моделью из модуля 1 

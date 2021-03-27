@@ -14,7 +14,7 @@ with open('myfile.pkl', 'rb') as pkl_file:
 
 try:
     # Подключимся к серверу:
-    connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
+    connection = pika.BlockingConnection(pika.ConnectionParameters(host='rabbitmq'))
     channel = connection.channel()
 
     # Укажем, с какими очередями будем работать:

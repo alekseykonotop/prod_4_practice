@@ -11,15 +11,13 @@ from sklearn.datasets import load_diabetes
 X, y = load_diabetes(return_X_y=True)
 # print("Shape X: ", X.shape)
 
-ind = 0
 
-while ind < 100:
-    ind += 1
+while True:
     try:
         random_row = np.random.randint(0, X.shape[0]-1)
 
         # Подключение к серверу на локальном хосте:
-        connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
+        connection = pika.BlockingConnection(pika.ConnectionParameters(host='rabbitmq'))
         channel = connection.channel()
 
         # Создадим очереди, с которыми будем работать:
@@ -30,13 +28,13 @@ while ind < 100:
         # Опубликуем сообщение c признаками
         channel.basic_publish(exchange='',
                               routing_key='Features',
-                              body=json.dumps(list(X[random_row]))
+                              body=json.dumps(list(X[random_row])))
         print('Сообщение с вектором признаков, отправлено в очередь')
 
         # Опубликуем сообщение c правильным ответом
         channel.basic_publish(exchange='',
                               routing_key='y_true',
-                              body=json.dumps(list(y[random_row]))
+                              body=json.dumps(list(y[random_row])))
         
         print('Сообщение с правильным ответом, отправлено в очередь')
 

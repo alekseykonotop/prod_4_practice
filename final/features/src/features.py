@@ -11,37 +11,38 @@ from sklearn.datasets import load_diabetes
 X, y = load_diabetes(return_X_y=True)
 # print("Shape X: ", X.shape)
 
+ind = 0
+while ind <= 10:
+    ind += 1
+    # try:
+    random_row = np.random.randint(0, X.shape[0]-1)
 
-while True:
-    try:
-        random_row = np.random.randint(0, X.shape[0]-1)
+    # Подключение к серверу на локальном хосте:
+    connection = pika.BlockingConnection(pika.ConnectionParameters(host='rabbitmq'))
+    channel = connection.channel()
 
-        # Подключение к серверу на локальном хосте:
-        connection = pika.BlockingConnection(pika.ConnectionParameters(host='rabbitmq'))
-        channel = connection.channel()
-
-        # Создадим очереди, с которыми будем работать:
-        channel.queue_declare(queue='Features')
-        channel.queue_declare(queue='y_true')
+    # Создадим очереди, с которыми будем работать:
+    channel.queue_declare(queue='Features')
+    channel.queue_declare(queue='y_true')
 
 
-        # Опубликуем сообщение c признаками
-        channel.basic_publish(exchange='',
-                              routing_key='Features',
-                              body=json.dumps(list(X[random_row])))
-        print('Сообщение с вектором признаков, отправлено в очередь')
+    # Опубликуем сообщение c признаками
+    channel.basic_publish(exchange='',
+                            routing_key='Features',
+                            body=json.dumps(list(X[random_row])))
+    print('Сообщение с вектором признаков, отправлено в очередь')
 
-        # Опубликуем сообщение c правильным ответом
-        channel.basic_publish(exchange='',
-                              routing_key='y_true',
-                              body=json.dumps(list(y[random_row])))
-        
-        print('Сообщение с правильным ответом, отправлено в очередь')
+    # Опубликуем сообщение c правильным ответом
+    channel.basic_publish(exchange='',
+                            routing_key='y_true',
+                            body=json.dumps(y[random_row]))
+    
+    print('Сообщение с правильным ответом, отправлено в очередь')
 
-        # Закроем подключение 
-        connection.close()
-        
-        # иммитация задержки
-        time.sleep(2)
-    except:
-        print(f"Не удалось подключиться к очереди")
+    # Закроем подключение 
+    connection.close()
+    
+    # иммитация задержки
+    time.sleep(2)
+    # except:
+    #     print(f"Не удалось подключиться к очереди")

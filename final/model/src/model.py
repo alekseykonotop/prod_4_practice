@@ -5,7 +5,6 @@ import pika
 import json
 import pickle
 import numpy as np
-# from sklearn import linear_model
 
 
 # Чтение файла с обученной моделью
@@ -24,13 +23,13 @@ try:
     # Напишем функцию, определяющую, как работать с полученным сообщением:
     def callback(ch, method, properties, body):
         print(f'Получен вектор признаков {body}')
-        features = json.loads(body)
+        features, un_id = json.loads(body)
         pred = regressor.predict(np.array(features).reshape(1, -1))
 
         # Опубликуем сообщение
         channel.basic_publish(exchange='',
                             routing_key='y_predict',
-                            body=json.dumps(pred[0]))
+                            body=json.dumps([pred[0], un_id]))
         print(f"Предсказание с {pred[0]}, отправлено в очередь y_predict")
 
     # Зададим правила чтения из очереди, указанной в параметре queue:

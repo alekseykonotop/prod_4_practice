@@ -11,9 +11,6 @@ import uuid
 
 X, y = load_diabetes(return_X_y=True)
 
-# сгенерируем уникальный код пары признаки-правильный ответ
-un_id = str(uuid.uuid4())
-
 while True:
     try:
         random_row = np.random.randint(0, X.shape[0]-1)
@@ -26,18 +23,20 @@ while True:
         channel.queue_declare(queue='Features')
         channel.queue_declare(queue='y_true')
 
-
+        # сгенерируем уникальный код пары признаки-правильный ответ
+        un_id = str(uuid.uuid4())
+        
         # Опубликуем сообщение c признаками
         channel.basic_publish(exchange='',
                                 routing_key='Features',
                                 body=json.dumps([list(X[random_row]), un_id]))
-        print('Сообщение с вектором признаков, отправлено в очередь')
+        print(f"{un_id}: Сообщение с вектором признаков, отправлено в очередь")
 
         # Опубликуем сообщение c правильным ответом
         channel.basic_publish(exchange='',
                                 routing_key='y_true',
                                 body=json.dumps([y[random_row], un_id]))
-        print('Сообщение с правильным ответом, отправлено в очередь')
+        print(f"{un_id}: Сообщение с правильным ответом, отправлено в очередь")
 
         # Закроем подключение 
         connection.close()

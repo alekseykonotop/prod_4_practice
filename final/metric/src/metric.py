@@ -44,7 +44,7 @@ def callback(ch, method, properties, body):
             y_pred_dict[pair_id] = y_value
 
     # Запись сообщения в файл
-    message = f"{pair_id}: Из очереди {method.routing_key}, получено значение: [ {np.round(y_value, 1)} ]'
+    message = f"{pair_id}: Из очереди {method.routing_key}, получено значение: [ {np.round(y_value, 1)} ]"
     with open('./logs/labels_log.txt', 'a') as log:
         log.write(message +'\n')
     print(f"{pair_id}: Сообщение от {method.routing_key} записано в labels_log.txt")

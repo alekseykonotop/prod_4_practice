@@ -5,8 +5,10 @@ import pika
 import json
 import numpy as np
 import time
-from sklearn.datasets import load_diabetes
 import uuid
+
+from sklearn.datasets import load_diabetes
+
 
 
 X, y = load_diabetes(return_X_y=True)
@@ -23,20 +25,20 @@ while True:
         channel.queue_declare(queue='Features')
         channel.queue_declare(queue='y_true')
 
-        # сгенерируем уникальный код пары признаки-правильный ответ
-        un_id = str(uuid.uuid4())
+        # сгенерируем уникальный код пары features - y_true
+        pair_id = str(uuid.uuid4())
         
         # Опубликуем сообщение c признаками
         channel.basic_publish(exchange='',
                                 routing_key='Features',
-                                body=json.dumps([list(X[random_row]), un_id]))
-        print(f"{un_id}: Сообщение с вектором признаков, отправлено в очередь")
+                                body=json.dumps([list(X[random_row]), pair_id]))
+        print(f"{pair_id}: Сообщение с вектором признаков, отправлено в очередь")
 
         # Опубликуем сообщение c правильным ответом
         channel.basic_publish(exchange='',
                                 routing_key='y_true',
-                                body=json.dumps([y[random_row], un_id]))
-        print(f"{un_id}: Сообщение с правильным ответом, отправлено в очередь")
+                                body=json.dumps([y[random_row], pair_id]))
+        print(f"{pair_id}: Сообщение с правильным ответом, отправлено в очередь")
 
         # Закроем подключение 
         connection.close()

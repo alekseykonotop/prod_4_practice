@@ -4,15 +4,13 @@
 import pika
 import json
 import os
-import numpy as np
 import math
+import csv
+import numpy as np
+import pandas as pd
 
 from sklearn.metrics import mean_squared_error as mse
 
-y_true_lst = []
-y_pred_lst = []
-y_true_dict = {}
-y_pred_dict = {}
 
 connection = pika.BlockingConnection(
     pika.ConnectionParameters(host='rabbitmq'))
@@ -22,40 +20,42 @@ channel.queue_declare(queue='y_true')
 channel.queue_declare(queue='y_predict')
 
 def calc_rmse():
-    mse_metric = mse(y_true_lst, y_pred_lst)
-    rmse = np.round(math.sqrt(mse_metric), 1)
+    # Read csv-files
+    pred_df = pd.read_csv('./results/y_predict.csv', delimiter=';', header=None)
+    true_df = pd.read_csv('./results/y_true.csv', delimiter=';', header=None)
+    pred_df.columns = ['uid', 'value']
+    true_df.columns = ['uid', 'value']
+
+    # Concatenate dataframes
+    df_calc = pd.merge(true_df, pred_df, on='uid', suffixes=['_true', '_pred'])
     
-    # Запись метрики в файл
+    # Calculate rmse
+    rmse = np.round(mse(df_calc['value_true'], df_calc['value_pred'], squared=False), 2)
+    print(f"RMSE: {rmse}")
+
+    # Write metrics value in file
     message = f"RMSE метрика обновлена: [ {rmse} ]"
-    with open('./logs/metrics_log.txt', 'a') as log:
-        log.write(message + '\n')
-    print(f"RMSE метрика записана в metrics_log.txt")
+    with open('./results/metrics.txt', 'a') as txt_file:
+        txt_file.write(message + '\n')
+    print(f"RMSE метрика записана в metrics.txt")
 
 
 def callback(ch, method, properties, body):
     y_value, pair_id = json.loads(body)
-    
-    if method.routing_key == 'y_true':
-        if pair_id not in y_true_dict:
-            y_true_dict[pair_id] = y_value
 
-    if method.routing_key == 'y_predict':
-        if pair_id not in y_pred_dict:
-            y_pred_dict[pair_id] = y_value
+    # write data to csv file
+    with open(f"./results/{method.routing_key}.csv", mode='a') as csv_file:
+        writer = csv.writer(csv_file, delimiter=';')
+        writer.writerow([pair_id, y_value])
 
-    # Запись сообщения в файл
-    message = f"{pair_id}: Из очереди {method.routing_key}, получено значение: [ {np.round(y_value, 1)} ]"
-    with open('./logs/labels_log.txt', 'a') as log:
-        log.write(message +'\n')
+    # write log to file
+    message = f"{pair_id}: Из очереди {method.routing_key}, получено знач.: [ {np.round(y_value, 1)} ]"
+    with open('./logs/labels_log.txt', 'a') as log_file:
+        log_file.write(message +'\n')
     print(f"{pair_id}: Сообщение от {method.routing_key} записано в labels_log.txt")
 
-    # Добавим y_true и y_predict в списки значений, если уже имеем оба значения с одинаковым id пары   
-    if pair_id in y_true_dict and pair_id in y_pred_dict:
-        y_true_lst.append(y_true_dict.pop(pair_id))
-        y_pred_lst.append(y_pred_dict.pop(pair_id))
-
-        #  обновим метрику RMSE на новых данных
-        calc_rmse()
+    # обновим метрику RMSE на новых данных
+    calc_rmse()
 
 channel.basic_consume(
     queue='y_predict', on_message_callback=callback, auto_ack=True)
